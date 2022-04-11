@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>HASS Assignment 5</title>
+    <!DOCTYPE html>
+    <meta charset="utf-8">
+
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v6.js"></script>
+    <style>
+        body {
+            width: 90%;
+            max-width: 1200px;
+            margin: 2em auto;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 30px;
+        }
+
+        topleft {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        topright {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        bottomleft {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        bottomright {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        img {
+            width: 100%;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin: 0;
+        }
+
+        .introduction {
+            text-align: center;
+        }
+
+        .red {
+            color: #773333;
+        }
+
+        .pink {
+            color: #F781BC;
+        }
+
+        .teal {
+            color: #9BD8C8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="introduction">
+        <h1>
+            Hee Ming Shan
+        </h1>
+        <h2>
+            Assignment 5
+        </h2>
+        <p>The mentioned charts can be found on <a href="reddit.com/r/dataisugly">reddit.com/r/dataisugly</a></p>
+    </div>
+
+    <div class="container">
+        <topleft>
+
+            <h3> Chart Junk #2 - Criticism </h3>
+
+            <ul>
+                <li>
+                    <b>Poor Use of Identity Channel (Color).</b> The designer probably wanted to separate the price
+                    fairness into bands and showcase them in different colors. However, it is not entirely necessary to
+                    use the color channel to encapsulate this information. Also, there is no legend for the chart.
+                    <br><br>
+                </li>
+                <li>
+                    <b>Bar Chart could be better utilised.</b> If the intention is to rank and compare the price
+                    fairness across various MMOs, what the designer could do minimally is to rank the MMOs in terms of
+                    their price fairness score. Since the X axis does not contain any order information, it is
+                    entirely possible to do so.
+                    <br><br>
+                </li>
+            </ul>
+
+        </topleft>
+        <topright>
+            <img src="https://i.redd.it/v5m03acwx1r81.png">
+            <p1>
+                Source: <a
+                    href="https://www.reddit.com/r/MMORPG/comments/tubh4o/results_from_the_mmo_pricing_fairness_poll/">
+                    https://www.reddit.com/r/MMORPG/comments/tubh4o/results_from_the_mmo_pricing_fairness_poll/
+                </a>
+            </p1>
+        </topright>
+        <bottomleft>
+
+
+            <h3> Chart Junk #2 - Rectified </h3>
+
+            <ul>
+                <li>
+                    <b>Ordered Bar Chart.</b> With the bar chart ordered in term of its frequency, we can better
+                    identify what are the MMOs with superb or good pricing. Furthermore, we are able to gauge the
+                    ranking of each MMO by counting from the leftmost bar
+                    <br><br>
+                </li>
+                <li>
+                    <b>Better Use of Identity Channel (Color).</b> Assuming that the color channel (i.e. binning based
+                    on pricing fairness), the legend will provides a clearer picture behind the various bands.
+                    Similarly, using the Ordered Bar Chart, it allows readers to easily see what are the MMOs within the
+                    same group.
+                    <br><br>
+                </li>
+            </ul>
+
+        </bottomleft>
+        <bottomright>
+
+            <!-- Create a div where the graph will take place -->
+            <div id="my_dataviz"></div>
+
+        </bottomright>
+        <script>
+
+            var tier1 = "#54A954"
+            var tier2 = "#F7BD32"
+            var tier3 = "#EC6A34"
+            var tier4 = "#C23228"
+
+            // set the dimensions and margins of the graph
+            const margin = { top: 30, right: 30, bottom: 70, left: 60 },
+                width = 800 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // append the svg object to the body of the page
+            const svg = d3.select("#my_dataviz")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // Parse the Data
+            d3.csv("https://raw.githubusercontent.com/mingshanhee/HASS-assignment5/main/mmo_price_fairness.csv").then(function (data) {
+
+                // X axis
+                var x = d3.scaleBand()
+                    .range([0, width])
+                    .domain(data.map(d => d.MMO))
+                    .padding(0.2);
+                svg.append("g")
+                    .attr("transform", `translate(0, ${height})`)
+                    .call(d3.axisBottom(x))
+                    .selectAll("text")
+                    .attr("transform", "translate(-10,0)rotate(-45)")
+                    .style("text-anchor", "end");
+
+                // Add Y axis
+                const y = d3.scaleLinear()
+                    .domain([0, 5])
+                    .range([height, 0]);
+                svg.append("g")
+                    .call(d3.axisLeft(y));
+
+                // Bars
+                svg.selectAll("mybar")
+                    .data(data)
+                    .join("rect")
+                    .attr("x", d => x(d.MMO))
+                    .attr("y", d => y(d.Price))
+                    .attr("width", x.bandwidth())
+                    .attr("height", d => height - y(d.Price))
+                    .attr("fill", function (d) {
+                        if (d.Price > 3.85) {
+                            return tier1
+                        } else if (d.Price > 3.40) {
+                            return tier2
+                        } else if (d.Price > 2.7) {
+                            return tier3
+                        } else {
+                            return tier4
+                        }
+                    })
+
+                svg.selectAll("text.bar")
+                    .data(data)
+                    .enter().append("text")
+                    .attr("class", "bar")
+                    .attr("text-anchor", "middle")
+                    .attr("x", function (d) { return x(d.MMO) + 15; })
+                    .attr("y", function (d) { return y(d.Price) - 3; })
+                    .text(function (d) { return d.Price; });
+
+            })
+
+            // Handmade legend
+            var cx = 600
+            svg.append("rect").attr("x", cx).attr("y", 0).attr("width", 12).attr("height", 12).style("fill", tier1)
+            svg.append("rect").attr("x", cx).attr("y", 20).attr("width", 12).attr("height", 12).style("fill", tier2)
+            svg.append("rect").attr("x", cx).attr("y", 40).attr("width", 12).attr("height", 12).style("fill", tier3)
+            svg.append("rect").attr("x", cx).attr("y", 60).attr("width", 12).attr("height", 12).style("fill", tier4)
+            svg.append("text").attr("x", cx + 20).attr("y", 8).text("Superb Pricing").style("font-size", "15px").attr("alignment-baseline", "middle")
+            svg.append("text").attr("x", cx + 20).attr("y", 28).text("Good Pricing").style("font-size", "15px").attr("alignment-baseline", "middle")
+            svg.append("text").attr("x", cx + 20).attr("y", 48).text("Adequate Pricing").style("font-size", "15px").attr("alignment-baseline", "middle")
+            svg.append("text").attr("x", cx + 20).attr("y", 68).text("Poor Pricing").style("font-size", "15px").attr("alignment-baseline", "middle")
+
+        </script>
+    </div>
+
+</body>
+
+</html>
